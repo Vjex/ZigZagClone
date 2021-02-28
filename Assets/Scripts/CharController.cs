@@ -24,6 +24,11 @@ public class CharController : MonoBehaviour {
     private GameManager gamemanager;
 
 
+    //Crystal Object For Crystal Effect.
+    //If If We Dont Know The Exact Eleemnt Name We Can Take It Under GameObject.
+    public GameObject crystalEffect;
+
+
 	// Use this for initialization
 	void Awake () {
 
@@ -80,8 +85,21 @@ public class CharController : MonoBehaviour {
         if (!Physics.Raycast(rayStart.position, -transform.up, out hit , Mathf.Infinity)){
             //now Sett the Trigger Paramer which we have created inside our anim_comntroller for Going to Fall Animation State.
 
-            Debug.Log("No Hit Found");
+           // Debug.Log("No Hit Found");
             anim.SetTrigger("isFalling");
+        }
+        else
+        {//Note * : This Else Part Is Only To Handle if there is Any Gap Left Bettween the Two Road Parts so Player Start in Falling Animation .
+         //This Is Not A Good Solution To HAve by Setting Animation BAck To Running //
+         //We Should Find That Gap OF Reaseon And Fix That.
+         //But Here For My Project I Have Fixed that Just Adding This Section As The Project Video Im Learning From Had This Error And Solved By Creating A Back Animation To Running .
+         //So Overall We May Have Any Gap Between Two Road Points Which Is take Cared By this Animation / Else Condition..
+
+
+
+            //////Setting Animation Trigger From Falling to Running Again.
+            anim.SetTrigger("notFallingAnyMore");
+
         }
 
 
@@ -95,7 +113,14 @@ public class CharController : MonoBehaviour {
 
     }
 
+    //Change Player Direction 
     private void Switch(){
+
+        //Do not change Direction Untill game Started .
+        if (!gamemanager.isGameStarted)
+        {
+            return;
+        }
 
         walkingRight = !walkingRight;
 
@@ -104,6 +129,36 @@ public class CharController : MonoBehaviour {
         else
             transform.rotation = Quaternion.Euler(0, -45, 0);
 
+    }
+
+
+    //No  Collide/Trigger With Any Object by the Player This inbuilt Method Will be called.
+
+    private void OnTriggerEnter(Collider other)
+    {   
+
+        //other is The Collider of Ther Collide Crystal tag .
+            if(other.tag == "Crystal")
+        {   
+            
+
+            //Now Increase the Score.
+            gamemanager.IncreaseScrore();
+
+
+            ////Showing Crystal Effect At the Position of player as Crystal Will Be There As Player Collides With.
+            /////Quarternion.identity means No rotation.
+           // GameObject g = Instantiate(crystalEffect, transform.position, Quaternion.identity);  //Crystal effect at The Feet of The Player as Player Pivot Is At Feet.
+            GameObject g = Instantiate(crystalEffect, rayStart.transform.position, Quaternion.identity); //Crystal Effect at the Chest Of The Player as raystart Pivot Point is At chest of the Player.
+
+            //Destroy Crystal Effect After 2 Seconds
+            Destroy(g, 2);
+
+            //Drstroy The Crystall Player Collides With.
+            Destroy(other.gameObject);
+
+
+        }    
     }
 
 }
